@@ -1,3 +1,4 @@
+import keyboard
 import random
 from typing import List, Tuple
 
@@ -11,9 +12,7 @@ class snake:
     snake_symbol = 'o'
     snake_head_symbol = 'Q'
     collision_symbol = 'Z'
-    snake = []
 
-    field = []
 
     @classmethod
     def gen_field(cls):
@@ -76,7 +75,10 @@ class snake:
         for index, item in enumerate(where_snake_tail.copy()):
             # if item[0] < 0 or item[0] >= cls.w or item[1] < 0 or item[1] >= cls.h:
             if cls.check_snake_in_field(*item):
-                where_snake_tail.pop(index)
+                try:
+                    where_snake_tail.pop(index)
+                except Exception:
+                    pass
         snake_tail_pozition = random.randint(0, len(where_snake_tail) - 1)
         print(f'tail random var {snake_tail_pozition}')
         where_snake_tail_elem = where_snake_tail[snake_tail_pozition]
@@ -169,3 +171,71 @@ print(snake_array)
 print(snake_head)
 
 snake.print_snake(field)
+
+class GAME:
+    field = []
+    free_field = []
+    snake_array = []
+    snake_head = []
+    status = ''
+    
+    def __init__(self):
+        self.field = []
+        self.free_field = []
+        self.snake_array = []
+        self.snake_head = []
+        self.status = ''
+        self.field, self.free_field = snake.gen_field()
+        self.field, self.snake_array, self.snake_head = snake.gen_snake(field=field)
+        self.field = snake.gen_fruit(field=field, snake_fields=snake_array)
+
+
+    def pprint(self):
+        snake.print_snake(self.field)
+
+    def move(self, _move):
+
+        self.status,self.field,self.snake_array,self.snake_head = snake.move_snake(
+                                                                    snake=snake_array, 
+                                                                    snake_head=snake_head, 
+                                                                    field=field, 
+                                                                    move=_move)
+
+game = GAME()
+
+game.move('right')
+game.pprint()
+
+import keyboard
+
+def print_pressed_keys(e):
+    print(e, e.event_type, e.name)
+
+keyboard.hook(print_pressed_keys)
+keyboard.wait()
+
+from pynput import keyboard
+
+def on_release(key):
+    if key == keyboard.Key.left or key == keyboard.KeyCode.from_char('a'):
+        print('left')
+        game.move('left')
+        game.pprint()
+    if key == keyboard.Key.right or key == keyboard.KeyCode.from_char('d'):
+        print('right')
+        game.move('right')
+        game.pprint()
+    if key == keyboard.Key.up or key == keyboard.KeyCode.from_char('w'):
+        print('up')
+        game.move('up')
+        game.pprint()
+    if key == keyboard.Key.down or key == keyboard.KeyCode.from_char('s'):
+        print('down')
+        game.move('down')
+        game.pprint()
+    if key == keyboard.Key.esc:
+        # Stop listener
+        return False
+
+with keyboard.Listener(on_release=on_release) as listener:
+    listener.join()
